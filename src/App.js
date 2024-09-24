@@ -25,6 +25,13 @@ export default function App(){
 
 
 const [showAddFriend, setShowAddFriend] = useState(false);
+const [friends, setFriends] = useState(initialFriends)
+
+function handleAddFriend(newFriend){
+  setFriends((friends) => [...friends, newFriend])
+  setShowAddFriend(false)
+}
+
 
 function handleShowAddFriend(){
   setShowAddFriend((currentState) => !currentState)
@@ -33,8 +40,8 @@ function handleShowAddFriend(){
   return (
   <div className="app">
     <div className="sidebar">
-      <FriendsList />
-      {showAddFriend && <FormAddFriend />}
+      <FriendsList friends={friends}/>
+      {showAddFriend && <FormAddFriend onAddFriend={handleAddFriend}/>}
       <Button  onClick={handleShowAddFriend}>{showAddFriend ? "Close" : "Add friend"}</Button>
     </div>
     <FormSplitBill />
@@ -43,8 +50,7 @@ function handleShowAddFriend(){
 }
 
 
-function FriendsList(){
-  const friends = initialFriends;
+function FriendsList({friends}){
   return(
     <ul>
       {friends.map((friend)=> <Friend friend={friend} key={friend.id}/>)}
@@ -83,14 +89,35 @@ function Button({children, onClick}){
   )
 }
 
-function FormAddFriend(){
+function FormAddFriend({onAddFriend}){
+  const id = crypto.randomUUID();
+
+  const [name, setName] = useState();
+  const [image, setImage] =useState("https://i.pravatar.cc/48"); 
+
+  function handleOnSubmit(e){
+    if(!name || !image) return;
+
+    e.preventDefault(); 
+
+    const newFriend = {
+     name,
+     image: `${image}?=${id}`,
+     balance: 0,
+    }
+
+    onAddFriend(newFriend);
+    setName("")
+    setImage("https://i.pravatar.cc/48")
+  }
+
   return(
-    <form className="form-add-friend">
+    <form className="form-add-friend" onSubmit={handleOnSubmit}>
       <label>👯 Friend name</label>
-      <input type="text"></input>
+      <input value={name} type="text" onChange={(e) => setName(e.target.value)}></input>
 
       <label>🌇 Image URL</label>
-      <input type="text"></input>
+      <input value={image}type="text" onChange={(e) => setImage(e.target.value)}></input>
       <Button>Add</Button>
     </form>
   );
